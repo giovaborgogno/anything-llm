@@ -36,8 +36,8 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         base: develop
-        head: ${{ steps.fetch_public_master.outputs.BRANCH_NAME }}
-        title: 'Sync Fork with changes from public master'
+        branch: ${{ steps.fetch_public_master.outputs.BRANCH_NAME }}
+        title: '[SYNC] Sync Fork with changes from public master'
         body: 'This pull request syncs the fork with the changes from the public master repository.'
         author: 'Giovanni Borgogno <giovaborgogno@gmail.com>'
         labels: 'sync, automated'
