@@ -1,0 +1,45 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '15 20 * * *'  # 20:15 UTC, which is 17:15 en Argentina
+  workflow_dispatch:
+
+jobs:
+  sync_fork:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+      with:
+        ref: develop
+        
+    - name: Git Config
+      run: |
+        git config --global user.email "giovaborgogno@gmail.com"
+        git config --global user.name "Giovanni Borgogno"
+
+    - name: Fetch public master and create new branch
+      id: fetch_public_master
+      run: |
+        TIMESTAMP=$(date +'%m-%d-%Y')
+        BRANCH_NAME="sync-fork-$TIMESTAMP"
+        git remote add public https://github.com/Mintplex-Labs/anything-llm || true
+        git fetch public master
+        git checkout -b $BRANCH_NAME public/master
+        git push -u origin $BRANCH_NAME
+        echo "::set-output name=BRANCH_NAME::$BRANCH_NAME"
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        base: develop
+        head: ${{ steps.fetch_public_master.outputs.BRANCH_NAME }}
+        title: 'Sync Fork with changes from public master'
+        body: 'This pull request syncs the fork with the changes from the public master repository.'
+        author: 'Giovanni Borgogno <giovaborgogno@gmail.com>'
+        labels: 'sync, automated'
+        assignees: 'giovaborgogno'
+        reviewers: 'giovaborgogno'
