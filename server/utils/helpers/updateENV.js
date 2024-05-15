@@ -155,6 +155,10 @@ const KEY_MAPPING = {
     envKey: "TEXT_GEN_WEB_UI_MODEL_TOKEN_LIMIT",
     checks: [nonZero],
   },
+  TextGenWebUIAPIKey: {
+    envKey: "TEXT_GEN_WEB_UI_API_KEY",
+    checks: [],
+  },
 
   // Generic OpenAI InferenceSettings
   GenericOpenAiBasePath: {
@@ -172,6 +176,10 @@ const KEY_MAPPING = {
   GenericOpenAiKey: {
     envKey: "GENERIC_OPEN_AI_API_KEY",
     checks: [],
+  },
+  GenericOpenAiMaxTokens: {
+    envKey: "GENERIC_OPEN_AI_MAX_TOKENS",
+    checks: [nonZero],
   },
 
   EmbeddingEngine: {
@@ -334,7 +342,7 @@ const KEY_MAPPING = {
   // System Settings
   AuthToken: {
     envKey: "AUTH_TOKEN",
-    checks: [requiresForceMode],
+    checks: [requiresForceMode, noRestrictedChars],
   },
   JWTSecret: {
     envKey: "JWT_SECRET",
@@ -356,6 +364,32 @@ const KEY_MAPPING = {
   },
   AgentSerperApiKey: {
     envKey: "AGENT_SERPER_DEV_KEY",
+    checks: [],
+  },
+
+  // TTS/STT Integration ENVS
+  TextToSpeechProvider: {
+    envKey: "TTS_PROVIDER",
+    checks: [supportedTTSProvider],
+  },
+
+  // TTS OpenAI
+  TTSOpenAIKey: {
+    envKey: "TTS_OPEN_AI_KEY",
+    checks: [validOpenAIKey],
+  },
+  TTSOpenAIVoiceModel: {
+    envKey: "TTS_OPEN_AI_VOICE_MODEL",
+    checks: [],
+  },
+
+  // TTS ElevenLabs
+  TTSElevenLabsKey: {
+    envKey: "TTS_ELEVEN_LABS_KEY",
+    checks: [isNotEmpty],
+  },
+  TTSElevenLabsVoiceModel: {
+    envKey: "TTS_ELEVEN_LABS_VOICE_MODEL",
     checks: [],
   },
 };
@@ -409,6 +443,11 @@ function validOllamaLLMBasePath(input = "") {
   } catch {
     return "Not a valid URL";
   }
+}
+
+function supportedTTSProvider(input = "") {
+  const validSelection = ["native", "openai", "elevenlabs"].includes(input);
+  return validSelection ? null : `${input} is not a valid TTS provider.`;
 }
 
 function supportedLLM(input = "") {
@@ -567,6 +606,13 @@ async function validDockerizedUrl(input = "") {
 function validHuggingFaceEndpoint(input = "") {
   return input.slice(-6) !== ".cloud"
     ? `Your HF Endpoint should end in ".cloud"`
+    : null;
+}
+
+function noRestrictedChars(input = "") {
+  const regExp = new RegExp(/^[a-zA-Z0-9_\-!@$%^&*();]+$/);
+  return !regExp.test(input)
+    ? `Your password has restricted characters in it. Allowed symbols are _,-,!,@,$,%,^,&,*,(,),;`
     : null;
 }
 
