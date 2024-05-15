@@ -32,14 +32,6 @@ jobs:
         echo "::set-output name=BRANCH_NAME::$BRANCH_NAME"
 
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v6
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        base: develop
-        branch: ${{ steps.fetch_public_master.outputs.BRANCH_NAME }}
-        title: '[SYNC] Sync Fork with changes from public master'
-        body: 'This pull request syncs the fork with the changes from the public master repository.'
-        author: 'Giovanni Borgogno <giovaborgogno@gmail.com>'
-        labels: 'sync, automated'
-        assignees: 'giovaborgogno'
-        reviewers: 'giovaborgogno'
+      run: gh pr create -B develop -H ${{ steps.fetch_public_master.outputs.BRANCH_NAME }} --title '[SYNC] Sync Fork with changes from public master' --body 'This pull request syncs the fork with the changes from the public master repository.'
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
